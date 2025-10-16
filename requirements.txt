@@ -1,4 +1,4 @@
-# PyTorch (GPU version)
+# PyTorch (GPU version recommended)
 torch>=2.2.0
 torchvision>=0.17.0
 torchaudio>=2.2.0
@@ -10,11 +10,11 @@ matplotlib
 pillow
 tqdm
 pyyaml
+hydra-core
+iopath
+sv-ttk
 
 # For interactive tools and visualization
 jupyter
 notebook
 gradio>=4.0.0
-
-# For SAM2 and FacebookResearch utils
-git+https://github.com/facebookresearch/segment-anything-2.git
