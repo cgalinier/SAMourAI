@@ -70,11 +70,12 @@ pip install torch torchvision torchaudio
 
 Créez un dossier pour stocker les modèles et téléchargez-les automatiquement avec le script officiel :
 Ouvrir **Git Bash**, puis copier-coller
+
 ```bash
-cd /c/Users/<user>/Documents/SAMourAI/checkpoints
-curl -O https://raw.githubusercontent.com/facebookresearch/sam2/refs/heads/main/checkpoints/download_ckpts.sh
-chmod +x download_ckpts.sh
-./download_ckpts.sh
+mkdir -p /c/Users/<*USER*>/Documents/SAMourAI/checkpoints
+&& cd /c/Users/<*USER*>/Documents/SAMourAI/checkpoints
+&& curl -O https://raw.githubusercontent.com/facebookresearch/sam2/refs/heads/main/checkpoints/download_ckpts.sh && chmod +x download_ckpts.sh
+&& ./download_ckpts.sh
 ```
 Ce script télécharge tous les modèles SAM2 :
 - sam2.1_hiera_tiny.pth
