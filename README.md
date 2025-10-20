@@ -1,6 +1,7 @@
 
-# LISEZMOI : Installation de l’outil **SAMourAI** pour la segmentation d’images
+# LISEZMOI : Installation et utilisation de l’outil **SAMourAI** pour la segmentation d’images
 *(Basé sur le dépôt [SAMBIOTIC](https://github.com/jeremyfix/sambiotic) de Jérémy Fix)*
+Actualisé par le dépot [SAMourAI](https://github.com/cgalinier/SAMourAI.git)
 
 > **Auteur :** Corentin GALINIER, Université de Lorraine 
 > **Date de création :** 14/10/2025
@@ -97,37 +98,38 @@ samourai_env\Scripts\activate
 pip install -r requirements.txt
 ```
 **Exemple d’exécution**
-```bash
-cd C:\Users\<user>\Documents\SAMourAI\
-samourai_env\Scripts\activate
-python SAMourAI.py image_dir sam2.1-hiera-large
-```
+
+Pour utiliser SAMour sur un laptop sans GPU, lancer "SAMourAI_lite" shortcut.
+Pour utiliser SAMour sur un pc possédant un GPU, lancer "SAMourAI" shortcut.
+
+
 Les résultats seront enregistrés dans le dossier `masks`.
 ---
----
-**Etape pour créer un .exe à partir du répertoire**
-Ouvrir un terminal dans le dossier
-```bash
-cd C:\Users\p03184\Documents\SAMourAI
-```
+
+
+🔑 Différences Clés
+FonctionnalitéGPU VersionCPU VersionModèle par défautLargeTinyTaille max image2048px1024pxPrédiction pendant drag✅ Oui❌ NonThrottling❌ Non✅ 300msPréchargement❌ Non✅ OuiResamplingLANCZOSNEARESTChangement de modèle✅ Sans warning⚠️ Avec warning
+
+
+![alt text](image.png)
 
 ```bash
-pyinstaller --onefile --icon=assets\icon.ico ^
---add-data "gui.py;." ^
---add-data "segment-anything-2/sam2/configs;segment-anything-2/sam2/configs" ^
---add-data "assets;assets" ^
-launcher.py
+SAMourAI/
+├── gui_gpu.py          # Version GPU
+├── gui_cpu.py          # Version CPU  
+├── README.md                # Documentation
+├── assets/
+│   └── icon.ico            # Icône (optionnel)
+└── sam2/                   # Dossier SAM2
+    ├── configs/
+    │   └── sam2.1/
+    └── checkpoints/
+        ├── sam2.1_hiera_tiny.pt
+        ├── sam2.1_hiera_small.pt
+        ├── sam2.1_hiera_base_plus.pt
+        └── sam2.1_hiera_large.pt
+
 ```
-
-
-
-
-
-
-
-
-
-
 ## 9. Annexes
 
 - **SAMBIOTIC**  
