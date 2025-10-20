@@ -454,7 +454,7 @@ class BioticSegmentation:
         self.root = tk.Tk()
         self.root.title("SAMourAI GPU - Image Segmentation Tool")
 
-        icon_path = os.path.join(os.path.dirname(__file__), "assets", "icon.ico")
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "icon.ico")
         if os.path.exists(icon_path):
             try:
                 self.root.iconphoto(True, ImageTk.PhotoImage(Image.open(icon_path)))

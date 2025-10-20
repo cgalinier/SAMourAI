@@ -520,12 +520,13 @@ class BioticSegmentation:
         self.root = tk.Tk()
         self.root.title("SAMourAI CPU - Laptop Optimized")
 
-        icon_path = os.path.join(os.path.dirname(__file__), "assets", "icon.ico")
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "icon.ico")
         if os.path.exists(icon_path):
             try:
                 self.root.iconphoto(True, ImageTk.PhotoImage(Image.open(icon_path)))
             except:
                 pass
+
 
         main_frame = ttk.Frame(self.root)
         main_frame.pack(side=tk.RIGHT, expand=True, fill=tk.BOTH)
