@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-color 03
+color F0
 cls
 
 echo.
@@ -10,7 +10,7 @@ echo │╚═╗╠═╣║║║│ ││ │├┬┘╠═╣║│
 echo │╚═╝╩ ╩╩ ╩└─┘└─┘┴└─╩ ╩╩│
 echo ╚──────────────────────╝
 echo      /Lite version/
-echo ▬▬[════════════════════ﺤ 
+echo ▬▬[════════════════════- 
 echo.
 echo [Initializing system...]
 echo.
@@ -30,7 +30,7 @@ call "%VENV_PATH%"
 SET "IMAGE_DIR=%PROJECT_PATH%image_dir"
 if not exist "%IMAGE_DIR%" mkdir "%IMAGE_DIR%"
 
-echo [Launching SAMourAI Interface...]
+echo [Launching SAMourAI Lite Interface...]
 
 python "%PROJECT_PATH%launchers\launcher_cpu.py"
 

@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-color 03
+color 0F
 cls
 
 echo.
@@ -10,7 +10,7 @@ echo │╚═╗╠═╣║║║│ ││ │├┬┘╠═╣║│
 echo │╚═╝╩ ╩╩ ╩└─┘└─┘┴└─╩ ╩╩│
 echo ╚──────────────────────╝
 echo      /GPU version/
-echo ▬▬[════════════════════ﺤ 
+echo ▬▬[════════════════════- 
 echo.
 echo [Initializing system...]
 echo.
