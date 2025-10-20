@@ -73,9 +73,10 @@ Ouvrir **Git Bash**, puis copier-coller
 
 ```bash
 mkdir -p /c/Users/<*USER*>/Documents/SAMourAI/checkpoints
-&& cd /c/Users/<*USER*>/Documents/SAMourAI/checkpoints
-&& curl -O https://raw.githubusercontent.com/facebookresearch/sam2/refs/heads/main/checkpoints/download_ckpts.sh && chmod +x download_ckpts.sh
-&& ./download_ckpts.sh
+cd /c/Users/<*USER*>/Documents/SAMourAI/checkpoints
+curl -O https://raw.githubusercontent.com/facebookresearch/sam2/refs/heads/main/checkpoints/download_ckpts.sh
+chmod +x download_ckpts.sh
+./download_ckpts.sh
 ```
 Ce script télécharge tous les modèles SAM2 :
 - sam2.1_hiera_tiny.pth
@@ -89,6 +90,7 @@ Assurez-vous que le dossier suivant existe : `SAMourAI/segment-anything-2/sam2/c
 - sam2.1_hiera_t.yaml
 - sam2.1_hiera_s.yaml
 - sam2.1_hiera_b+.yaml
+- - sam2.1_hiera_l.yaml
 
 ## 8. Lancer SAMourAI  
 **Via l’environnement virtuel**
@@ -100,8 +102,8 @@ pip install -r requirements.txt
 ```
 **Exemple d’exécution**
 
-Pour utiliser SAMour sur un laptop sans GPU, lancer "SAMourAI_lite" shortcut.
-Pour utiliser SAMour sur un pc possédant un GPU, lancer "SAMourAI" shortcut.
+Pour utiliser SAMourAI sur un laptop sans GPU, lancer "SAMourAI_lite" shortcut.
+Pour utiliser SAMourAI sur un pc possédant un GPU, lancer "SAMourAI" shortcut.
 
 
 Les résultats seront enregistrés dans le dossier `masks`.
