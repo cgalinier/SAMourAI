@@ -37,7 +37,7 @@ For batch or high-resolution image processing, an NVIDIA GPU (≥ 12 GB VRAM) is
 
 ---
 
-### Installation (Windows ![Windows](https://upload.wikimedia.org/wikipedia/commons/0/0b/Windows_logo_-_2021.svg)🪟/ Linux🐧)
+### Installation (Windows🪟/ Linux)
 
 1. Install **Python 3.10 or 3.11** from [python.org/downloads](https://www.python.org/downloads/).  
    ➤ Check **“Add Python to PATH”** during installation.  
