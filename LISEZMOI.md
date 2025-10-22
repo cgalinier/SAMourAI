@@ -34,7 +34,7 @@ Pour un traitement d’images en série ou haute résolution, un GPU NVIDIA (≥
 
 ---
 
-### Installation (Windows🪟/ Linux)
+### Installation (Windows🪟/ Linux🐧)
 
 1. Installez **Python 3.10 ou 3.11** depuis [python.org/downloads](https://www.python.org/downloads/).  
    ➤ Cochez **“Add Python to PATH”** pendant l’installation.

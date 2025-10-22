@@ -37,7 +37,7 @@ For batch or high-resolution image processing, an NVIDIA GPU (≥ 12 GB VRAM) is
 
 ---
 
-### Installation (Windows🪟/ Linux)
+### Installation (Windows🪟/ Linux🐧)
 
 1. Install **Python 3.10 or 3.11** from [python.org/downloads](https://www.python.org/downloads/).  
    ➤ Check **“Add Python to PATH”** during installation.  
@@ -128,11 +128,11 @@ pip install -r requirements.txt
 **Execution**
 
 
-**On Windows**
+**On Windows🪟**
 - CPU version: run `SAMourAI_lite.bat`
 - GPU version: run `SAMourAI.bat`
 
-**On Linux**
+**On Linux🐧**
 - CPU version: run
 ```bash
 chmod +x Linux/SAMourAI_lite.sh
