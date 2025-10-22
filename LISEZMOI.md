@@ -25,7 +25,7 @@ Ce tableau considère les deux configurations testées suivantes :
 | **Processeur (CPU)** | Intel Core i5-10210U (4 cœurs / 8 threads @ 1.6 GHz) | Intel Core i9-13900 (24 cœurs / 32 threads @ 2 GHz) |
 | **Fabricant** | Dell Inc. | Dell Inc. |
 | **Modèle** | Latitude 5410 | Precision 3660 |
-| **Carte graphique (GPU)** | ✖ *CPU uniquement* | NVIDIA RTX A2000 12 Go |
+| **Carte graphique (GPU)** | *CPU uniquement* | NVIDIA RTX A2000 12 Go |
 | **Mémoire vive (RAM)** | ≥ 8 Go | ≥ 32 Go |
 | **Espace disque disponible** | ≥ 10 Go | ≥ 100 Go |
 | **Python** | ≥ 3.10 | ≥ 3.11 |
@@ -93,10 +93,10 @@ chmod +x download_ckpts.sh
 ./download_ckpts.sh
 ```
 Ce script télécharge les modèles :
-- sam2.1_hiera_tiny.pt
-- sam2.1_hiera_small.pt
-- sam2.1_hiera_base_plus.pt
-- sam2.1_hiera_large.pt
+- `sam2.1_hiera_tiny.pt`
+- `sam2.1_hiera_small.pt`
+- `sam2.1_hiera_base_plus.pt`
+- `sam2.1_hiera_large.pt`
 
 ## 7. Configurations SAM 2
 
@@ -104,10 +104,10 @@ Vérifiez que le dossier suivant existe :
 `SAMourAI/segment-anything-2/sam2/configs/sam2.1/`
 
 Et qu’il contient les fichiers :
-- sam2.1_hiera_t.yaml
-- sam2.1_hiera_s.yaml
-- sam2.1_hiera_b+.yaml
-- sam2.1_hiera_l.yaml
+- `sam2.1_hiera_t.yaml`
+- `sam2.1_hiera_s.yaml`
+- `sam2.1_hiera_b+.yaml`
+- `sam2.1_hiera_l.yaml`
 
 ## 8. Lancer SAMourAI
 1ère exécution (depuis l’environnement virtuel)
