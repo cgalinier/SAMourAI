@@ -5,8 +5,6 @@
 
 ---
 
-## Objective
-
 **SAMourAI** is a tool for **semi-automatic image segmentation**, built on [**SAM 2**](https://github.com/facebookresearch/sam2), developed by *Meta (Facebook Research)*.  
 It provides a **graphical interface** to perform image segmentation, available in both **CPU** and **GPU** modes.
 
@@ -121,11 +119,27 @@ pip install -r requirements.txt
 
 **Execution**
 
-Without GPU (CPU): run `SAMourAI_lite.cmd`
 
-With GPU (CUDA): run `SAMourAI.cmd`
+**On Windows**
+- CPU version: run `SAMourAI_lite.bat`
+- GPU version: run `SAMourAI.bat`
 
-Segmentation masks are saved in the `masks/` folder.
+**On Linux**
+- CPU version: run
+```bash
+chmod +x Linux/SAMourAI_lite.sh
+./Linux/SAMourAI_lite.sh
+```
+➜ `SAMourAI_lite.sh` is now an executable file (double-click)
+
+- GPU version: run
+```bash
+chmod +x Linux/SAMourAI.sh
+./Linux/SAMourAI.sh
+```
+➜ `SAMourAI.sh` is now an executable file (double-click)
+
+➠ Segmentation masks are saved in the `masks/` folder.
 
 ### 9. Project structure
 ```bash
@@ -150,8 +164,8 @@ SAMourAI/
 ├── LICENSE
 ├── README.md
 ├── requirements.txt
-├── SAMourAI.cmd              # GPU launcher
-└── SAMourAI_lite.cmd         # CPU launcher (lite)
+├── SAMourAI.bat              # GPU launcher
+└── SAMourAI_lite.bat        # CPU launcher (lite)
 
 ```
 

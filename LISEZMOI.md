@@ -5,8 +5,6 @@
 
 ---
 
-## Objectif
-
 **SAMourAI** est un outil de **segmentation semi-automatique d’images**, reposant sur le modèle [**SAM 2**](https://github.com/facebookresearch/sam2) développé par *Meta (Facebook Research)*.  
 Il offre une **interface graphique** permettant d’effectuer la segmentation d’images, en mode **CPU** ou **GPU**.
 
@@ -54,7 +52,7 @@ cd C:\Users\<user>\Documents
 git clone https://github.com/cgalinier/SAMourAI.git
 ```
 
-## 3. Cloner le déôt officiel SAM 2
+## 3. Cloner le dépôt officiel SAM 2
 ```bash
 cd SAMourAI
 git clone https://github.com/facebookresearch/segment-anything-2.git
@@ -119,11 +117,27 @@ pip install -r requirements.txt
 
 **Exécution**
 
-Sans GPU (CPU) : lancer `SAMourAI_lite.cmd`
 
-Avec GPU (CUDA) : lancer `SAMourAI.cmd`
+**Sur Windows**
+- CPU version:lancer `SAMourAI_lite.bat`
+- GPU version: lancer `SAMourAI.bat`
 
-Les masques sont enregistrés dans le dossier `masks/`.
+**Sur Linux**
+- CPU version: à la 1ère utilisation, lancer
+```bash
+chmod +x Linux/SAMourAI_lite.sh
+./Linux/SAMourAI_lite.sh
+```
+➜ `SAMourAI_lite.sh` est à présent un fichier exécutable (double-clic)
+
+- GPU version: à la 1ère utilisation, lancer
+```bash
+chmod +x Linux/SAMourAI.sh
+./Linux/SAMourAI.sh
+```
+➜ `SAMourAI.sh` est à présent un fichier exécutable (double-clic)
+
+➠Les masques sont enregistrés dans le dossier `masks/`.
 
 ### 9. Structure du projet
 ```bash
@@ -148,8 +162,8 @@ SAMourAI/
 ├── LICENSE
 ├── README.md
 ├── requirements.txt
-├── SAMourAI.cmd              # Lancement GPU
-└── SAMourAI_lite.cmd         # Lancement CPU (lite)
+├── SAMourAI.bat              # Lancement GPU
+└── SAMourAI_lite.bat         # Lancement CPU (lite)
 ```
 
 ## 10. Annexes
