@@ -1,141 +1,163 @@
+# SAMourAI — Installation and User Guide
+*(Based on the [SAMBIOTIC](https://github.com/jeremyfix/sambiotic) repository by Jérémy Fix)*
+> **Author:** Corentin GALINIER — University of Lorraine  
+> **Creation date:** October 22, 2025
 
-# LISEZMOI : Installation et utilisation de l’outil **SAMourAI** pour la segmentation d’images
-*(Basé sur le dépôt [SAMBIOTIC](https://github.com/jeremyfix/sambiotic) de Jérémy Fix)*
-Actualisé par le dépot [SAMourAI](https://github.com/cgalinier/SAMourAI.git)
-
-> **Auteur :** Corentin GALINIER, Université de Lorraine 
-> **Date de création :** 14/10/2025
 ---
 
-## Objectif
-  **SAMourAI** est un outil de segmentation semi-automatique d'images, utilisant le modèle [SAM2](https://github.com/facebookresearch/sam2) de *facebookresearch (Meta)*.
+## Objective
 
-## 1. Pré-requis
+**SAMourAI** is a tool for **semi-automatic image segmentation**, built on [**SAM 2**](https://github.com/facebookresearch/sam2), developed by *Meta (Facebook Research)*.  
+It provides a **graphical interface** to perform image segmentation, available in both **CPU** and **GPU** modes.
 
-### Configuration matérielle
+---
 
-| Élément | Configuration minimale | Configuration recommandée |
+![UI](assets/ui.png)
+
+---
+
+## 1. Prerequisites
+
+### Hardware Configuration
+The following table lists the two configurations that have been tested:
+
+| | Minimum configuration | Recommended configuration |
 |----------|------------------------|----------------------------|
-| **Système d’exploitation** | Microsoft Windows 11 Professionnel | Windows 11 |
-| **Processeur (CPU)** | Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz, 2112 MHz, 4 cœur(s), 8 processeur(s) logique(s) | 13th Gen Intel(R) Core(TM) i9-13900, 2000 MHz, 24 cœur(s), 32 processeur(s) logique(s) |
-| **Fabricant** | Dell Inc. | Dell Inc. |
-| **Modèle**| Latitude 5410 | Precision 3660|
-| **Carte graphique (GPU)** | ✖ *CPU uniquement* | NVIDIA RTX A2000 12GB |
-| **Mémoire vive (RAM)** | ≥ 8 Go | ≥ 32 Go |
-| **Espace disque disponible** | ≥ 10 Go | ≥ 100 Go |
-| **Python** | ≥ 3.10 | ≥ 3.11 avec dépendances à jour |
-| **PyTorch** | Version CPU | Dernière version stable compatible CUDA 12.x |
+| **Operating system** | Windows 11 Professional | Windows 11 |
+| **Processor (CPU)** | Intel Core i5-10210U (4 cores / 8 threads @ 1.6 GHz) | Intel Core i9-13900 (24 cores / 32 threads @ 2 GHz) |
+| **Manufacturer** | Dell Inc. | Dell Inc. |
+| **Model** | Latitude 5410 | Precision 3660 |
+| **Graphics card (GPU)** | ✖ *CPU only* | NVIDIA RTX A2000 12 GB |
+| **RAM** | ≥ 8 GB | ≥ 32 GB |
+| **Free disk space** | ≥ 10 GB | ≥ 100 GB |
+| **Python** | ≥ 3.10 | ≥ 3.11 |
+| **PyTorch** | CPU version | CUDA 12.x version |
 
-💡 *Remarque : SAM 2.1 peut fonctionner sans GPU, mais l’inférence est significativement plus lente. Pour un traitement d’images en série ou de haute résolution, un GPU NVIDIA avec ≥ 12 Go de VRAM est fortement recommandé.*
+***Note:** SAM 2.1 can run without a GPU, but inference will be significantly slower.  
+For batch or high-resolution image processing, an NVIDIA GPU (≥ 12 GB VRAM) is recommended.*
 
-### Sous Windows
-1. Installez **Python 3.10 ou 3.11** depuis [python.org/downloads](https://www.python.org/downloads/).
-2. Pendant l’installation, cochez **“Add Python to PATH”**.
-3. Installez **Git** depuis [git-scm.com](https://git-scm.com/downloads). Pendant l’installation, s'assurer que “Git Bash Here” est coché..
+---
 
-## 2. Créer un dossier de travail et cloner SAMourAI
+### Basic Installation on Windows
 
-Ouvrez un terminal (**Invite de commandes** ou **PowerShell**) puis exécutez :
+1. Install **Python 3.10 or 3.11** from [python.org/downloads](https://www.python.org/downloads/).  
+   ➤ Check **“Add Python to PATH”** during installation.  
+2. Install **Git** from [git-scm.com/downloads](https://git-scm.com/downloads).  
+   ➤ Check **“Git Bash Here”** to add a context menu option.
+
+---
+
+## 2. Create a working folder and clone SAMourAI
+
+Open **PowerShell** or **Command Prompt**, then run:
 
 ```bash
 cd C:\Users\<user>\Documents
 git clone https://github.com/cgalinier/SAMourAI.git
+
 ```
-## 3. Cloner le dépôt officiel SAM2 dans SAMourAI
+
+## 3. Clone the official SAM 2 repositroy
 ```bash
 cd SAMourAI
 git clone https://github.com/facebookresearch/segment-anything-2.git
 ```
 
-## 4. Créer et activer un environnement virtuel
+## 4. Create & activate a virtual environment
 ```bash
 python -m venv samourai_env
 samourai_env\Scripts\activate
 ```
-You should see (samourai_env) at the beginning of the line.
 
-## 5. Installer les dépendances
-Depuis le dossier SAMourAI, exécutez :
+Once activated, the prompt will show the (samourai_env) prefix.
+
+## 5. Install dependencies
+
+From the `SAMourAI/` folder:
 ```bash
 pip install --upgrade pip
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 ```
-Si vous n’avez pas de GPU Nvidia, utilisez cette ligne à la place :
+If you do not have an NVIDIA GPU, run instead:
 ```bash
 pip install torch torchvision torchaudio
 ```
 
-## 6. Télécharger les modèles / chekpoints SAM2
+## 6. Download SAM 2 models (checkpoints)
 
-Créez un dossier pour stocker les modèles et téléchargez-les automatiquement avec le script officiel :
-Ouvrir **Git Bash**, puis copier-coller
-
+Open Git Bash and run:
 ```bash
-mkdir -p /c/Users/<*USER*>/Documents/SAMourAI/checkpoints
-cd /c/Users/<*USER*>/Documents/SAMourAI/checkpoints
+mkdir -p /c/Users/<USER>/Documents/SAMourAI/checkpoints
+cd /c/Users/<USER>/Documents/SAMourAI/checkpoints
 curl -O https://raw.githubusercontent.com/facebookresearch/sam2/refs/heads/main/checkpoints/download_ckpts.sh
 chmod +x download_ckpts.sh
 ./download_ckpts.sh
 ```
-Ce script télécharge tous les modèles SAM2 :
-- sam2.1_hiera_tiny.pth
-- sam2.1_hiera_small.pth
-- sam2.1_hiera_base_plus.pth
-- sam2.2_hiera_large.pth
+This script downloads the following model files:
+- sam2.1_hiera_tiny.pt
+- sam2.1_hiera_small.pt
+- sam2.1_hiera_base_plus.pt
+- sam2.1_hiera_large.pt
 
-## 7. Configurations SAM2
+## 7. SAM 2  configurations
 
-Assurez-vous que le dossier suivant existe : `SAMourAI/segment-anything-2/sam2/configs/sam2.1/` et qu’il contient les fichiers YAML nécessaires :
+Verify that the following folder exists:
+`SAMourAI/segment-anything-2/sam2/configs/sam2.1/`
+
+And that it contains:
 - sam2.1_hiera_t.yaml
 - sam2.1_hiera_s.yaml
 - sam2.1_hiera_b+.yaml
-- - sam2.1_hiera_l.yaml
+- sam2.1_hiera_l.yaml
 
-## 8. Lancer SAMourAI  
-**Via l’environnement virtuel**
-1er lancement :
+## 8. Launching SAMourAI
+First run (from the virtual environment):
 ```bash
-cd C:\Users\<user>\Documents\SAMourAI\
+cd C:\Users\<user>\Documents\SAMourAI
 samourai_env\Scripts\activate
 pip install -r requirements.txt
 ```
-**Exemple d’exécution**
 
-Pour utiliser SAMourAI sur un laptop sans GPU, lancer "SAMourAI_lite" shortcut.
-Pour utiliser SAMourAI sur un pc possédant un GPU, lancer "SAMourAI" shortcut.
+**Execution**
 
+Without GPU (CPU): run `SAMourAI_lite.cmd`
 
-Les résultats seront enregistrés dans le dossier `masks`.
----
+With GPU (CUDA): run `SAMourAI.cmd`
 
+Segmentation masks are saved in the `masks/` folder.
 
-🔑 Différences Clés
-FonctionnalitéGPU VersionCPU VersionModèle par défautLargeTinyTaille max image2048px1024pxPrédiction pendant drag✅ Oui❌ NonThrottling❌ Non✅ 300msPréchargement❌ Non✅ OuiResamplingLANCZOSNEARESTChangement de modèle✅ Sans warning⚠️ Avec warning
-
-
-![alt text](image.png)
-
+### 9. Project structure
 ```bash
 SAMourAI/
-├── gui_gpu.py          # Version GPU
-├── gui_cpu.py          # Version CPU  
-├── README.md                # Documentation
-├── assets/
-│   └── icon.ico            # Icône (optionnel)
-└── sam2/                   # Dossier SAM2
-    ├── configs/
-    │   └── sam2.1/
-    └── checkpoints/
-        ├── sam2.1_hiera_tiny.pt
-        ├── sam2.1_hiera_small.pt
-        ├── sam2.1_hiera_base_plus.pt
-        └── sam2.1_hiera_large.pt
+├── assets/                   # Resources (application icon)
+│   └── icon.ico
+├── build/                    
+├── checkpoints/              # Pretrained SAM model files
+│   ├── sam2.1_hiera_base_plus.pt
+│   └── ...
+├── gui/                      # Graphical interface
+│   ├── __init__.py
+│   ├── gui_cpu.py            # CPU version
+│   └── gui_gpu.py            # GPU version
+├── image_dir/                # Folder of images to segment
+├── launchers/                # Launch scripts
+│   ├── launcher_cpu.py
+│   └── launcher_gpu.py
+├── masks/                    # Segmentation masks outputs
+├── samourai_env/             # Virtual environment
+├── segment-anything-2/       # Integrated SAM 2 repository
+├── LICENSE
+├── README.md
+├── requirements.txt
+├── SAMourAI.cmd              # GPU launcher
+└── SAMourAI_lite.cmd         # CPU launcher (lite)
 
 ```
-## 9. Annexes
+
+## 10. Resources
 
 - **SAMBIOTIC**  
   [https://github.com/jeremyfix/sambiotic](https://github.com/jeremyfix/sambiotic)  
-- **Documentation SAM :**  
-  [https://github.com/facebookresearch/segment-anything](https://github.com/facebookresearch/sam2)  
+- **SAM Documentation :**  
+  [https://github.com/facebookresearch/sam2](https://github.com/facebookresearch/sam2)  
