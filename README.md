@@ -6,7 +6,8 @@
 ---
 
 **SAMourAI** is a tool for **semi-automatic image segmentation**, built on [**SAM 2**](https://github.com/facebookresearch/sam2), developed by *Meta (Facebook Research)*.  
-It provides a **graphical interface** to perform image segmentation, available in both **CPU** and **GPU** modes.
+It provides a **graphical interface** to perform image segmentation (*binary masks .png*), available in both **CPU** and **GPU** modes.
+
 
 ---
 
@@ -36,7 +37,7 @@ For batch or high-resolution image processing, an NVIDIA GPU (≥ 12 GB VRAM) is
 
 ---
 
-### Basic Installation on Windows
+### Installation (Windows ![Windows](https://upload.wikimedia.org/wikipedia/commons/0/0b/Windows_logo_-_2021.svg)🪟/ Linux🐧)
 
 1. Install **Python 3.10 or 3.11** from [python.org/downloads](https://www.python.org/downloads/).  
    ➤ Check **“Add Python to PATH”** during installation.  
@@ -52,7 +53,6 @@ Open **PowerShell** or **Command Prompt**, then run:
 ```bash
 cd C:\Users\<user>\Documents
 git clone https://github.com/cgalinier/SAMourAI.git
-
 ```
 
 ## 3. Clone the official SAM 2 repository
@@ -62,11 +62,18 @@ git clone https://github.com/facebookresearch/segment-anything-2.git
 ```
 
 ## 4. Create & activate a virtual environment
+
+**On Windows**
 ```bash
 python -m venv samourai_env
 samourai_env\Scripts\activate
 ```
-
+**On Linux**
+```bash
+python -m venv samourai_env
+source samourai_env/bin/activate
+```
+---
 Once activated, the prompt will show the (samourai_env) prefix.
 
 ## 5. Install dependencies
@@ -111,6 +118,7 @@ And that it contains:
 
 ## 8. Launching SAMourAI
 First run (from the virtual environment):
+**On Windows**
 ```bash
 cd C:\Users\<user>\Documents\SAMourAI
 samourai_env\Scripts\activate
@@ -138,7 +146,7 @@ chmod +x Linux/SAMourAI.sh
 ./Linux/SAMourAI.sh
 ```
 ➜ `SAMourAI.sh` is now an executable file (double-click)
-
+---
 ➠ Segmentation masks are saved in the `masks/` folder.
 
 ### 9. Project structure
