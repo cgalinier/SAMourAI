@@ -158,14 +158,17 @@ SAMourAI/
 ├── launchers/                # Launch scripts
 │   ├── launcher_cpu.py
 │   └── launcher_gpu.py
+├── Linux/                    
+│   ├── SAMourAI.sh           # GPU interface launcher (Linux version)
+│   └── SAMourAI_lite.sh      # CPU interface launcher (Linux version)
 ├── masks/                    # Segmentation masks outputs
 ├── samourai_env/             # Virtual environment
 ├── segment-anything-2/       # Integrated SAM 2 repository
 ├── LICENSE
 ├── README.md
 ├── requirements.txt
-├── SAMourAI.bat              # GPU launcher
-└── SAMourAI_lite.bat        # CPU launcher (lite)
+├── SAMourAI.bat              # GPU launcher (Windows version)
+└── SAMourAI_lite.bat         # CPU launcher (lite, Windows version)
 
 ```
 
