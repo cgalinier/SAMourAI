@@ -57,7 +57,7 @@ git clone https://github.com/cgalinier/SAMourAI.git
 
 ```
 
-## 3. Clone the official SAM 2 repositroy
+## 3. Clone the official SAM 2 repository
 ```bash
 cd SAMourAI
 git clone https://github.com/facebookresearch/segment-anything-2.git
