@@ -146,7 +146,9 @@ chmod +x Linux/SAMourAI.sh
 ./Linux/SAMourAI.sh
 ```
 ➜ `SAMourAI.sh` is now an executable file (double-click)
+
 ---
+
 ➠ Segmentation masks are saved in the `masks/` folder.
 
 ### 9. Project structure
