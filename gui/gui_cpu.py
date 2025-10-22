@@ -47,7 +47,7 @@ from sam2.sam2_image_predictor import SAM2ImagePredictor
 
 # ----------------------------- Configuration CPU -----------------------------
 DEFAULT_MODEL = "sam2.1-hiera-tiny"
-MAX_IMAGE_SIZE = 1024  # Limité pour économiser mémoire
+MAX_IMAGE_SIZE = 2048
 PREDICTION_COOLDOWN = 0.3  # Secondes entre prédictions
 
 AVAILABLE_MODELS = {
@@ -185,6 +185,16 @@ class BioticSegmentation:
         self.load_images(directory)
         self.start_preload_thread()
         self.init_ui()
+
+    def get_current_filename(self):
+        """Renvoie le nom du fichier actuel, tronqué si trop long"""
+        if len(self.image_dataset.files) == 0:
+            return ""
+        full_name = str(pathlib.Path(self.image_dataset.files[self.image_idx]).name)
+        max_len = 60
+        if len(full_name) > max_len:
+            return full_name[:30] + "…" + full_name[-25:]
+        return full_name
 
     # ------------------------- Preloading Thread -------------------------
     def start_preload_thread(self):
@@ -426,6 +436,7 @@ class BioticSegmentation:
             return
         self.image_idx = new_idx
         self.image_label.config(text=f"Image: {self.image_idx + 1}/{len(self.image_dataset)}")
+        self.filename_label.config(text=self.get_current_filename())
         self.init_processing()
         self.preload_adjacent_images()
         self.update_display()
@@ -452,8 +463,8 @@ class BioticSegmentation:
         canvas_aspect_ratio = canvas_width / canvas_height
         image_aspect_ratio = img.width / img.height
         
-        # NEAREST pour CPU (plus rapide)
-        resample_method = Image.Resampling.NEAREST
+        # NLANCZOS pour CPU 
+        resample_method = Image.Resampling.LANCZOS
         
         if canvas_aspect_ratio > image_aspect_ratio:
             new_width = int(canvas_height * image_aspect_ratio)
@@ -520,7 +531,7 @@ class BioticSegmentation:
         self.root = tk.Tk()
         self.root.title("SAMourAI CPU - Laptop Optimized")
 
-        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "icon.ico")
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "icon_l.ico")
         if os.path.exists(icon_path):
             try:
                 self.root.iconphoto(True, ImageTk.PhotoImage(Image.open(icon_path)))
@@ -540,13 +551,29 @@ class BioticSegmentation:
         self.root.bind("<Key>", self.on_keystroke)
 
         # Image navigation
+        from pathlib import Path
+
         image_frame = tk.Frame(self.root)
         image_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+
+        # Label "1/20"
         self.image_label = tk.Label(
             image_frame, 
             text=f"Image: {self.image_idx + 1}/{len(self.image_dataset)}"
         )
-        self.image_label.pack(padx=5, pady=5)
+        self.image_label.pack(padx=5, pady=2)
+
+        # Label pour nom de fichier complet (tronqué si trop long)
+        self.filename_label = tk.Label(
+            image_frame,
+            text=self.get_current_filename(),
+            wraplength=500,   # largeur max avant retour à la ligne
+            fg="lightgray",
+            justify=tk.LEFT
+        )
+        self.filename_label.pack(padx=5, pady=2)
+
+        # Slider
         self.image_slider = ttk.Scale(
             image_frame, 
             from_=0, 
@@ -556,6 +583,7 @@ class BioticSegmentation:
         )
         self.image_slider.set(self.image_idx)
         self.image_slider.pack(padx=5, pady=5)
+
 
         # Draw mode
         draw_mode_frame = ttk.Frame(self.root)
@@ -684,7 +712,7 @@ class BioticSegmentation:
         help_text.insert(tk.END, f"• Prediction throttling ({PREDICTION_COOLDOWN}s cooldown)\n")
         help_text.insert(tk.END, "• Background image preloading\n")
         help_text.insert(tk.END, "• No prediction during box drag\n")
-        help_text.insert(tk.END, "• Fast NEAREST resampling\n")
+        help_text.insert(tk.END, "• LANCZOS resampling\n")
         help_text.insert(tk.END, "• Memory-efficient caching\n\n")
         help_text.insert(tk.END, f"Current Model: {self.current_modelname}\n")
         help_text.insert(tk.END, f"Max Image Size: {MAX_IMAGE_SIZE}px\n")

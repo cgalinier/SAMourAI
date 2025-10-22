@@ -169,6 +169,16 @@ class BioticSegmentation:
         self.load_images(directory)
         self.init_ui()
 
+    def get_current_filename(self):
+        """Renvoie le nom du fichier actuel, tronqué si trop long"""
+        if len(self.image_dataset.files) == 0:
+            return ""
+        full_name = str(pathlib.Path(self.image_dataset.files[self.image_idx]).name)
+        max_len = 60
+        if len(full_name) > max_len:
+            return full_name[:30] + "…" + full_name[-25:]
+        return full_name
+
     # ------------------------- Model Management -------------------------
     def change_model(self, modelname):
         if modelname == self.current_modelname:
@@ -364,6 +374,7 @@ class BioticSegmentation:
             return
         self.image_idx = new_idx
         self.image_label.config(text=f"Image: {self.image_idx + 1}/{len(self.image_dataset)}")
+        self.filename_label.config(text=self.get_current_filename())
         self.init_processing()
         self.update_display()
 
@@ -473,13 +484,29 @@ class BioticSegmentation:
         self.root.bind("<Key>", self.on_keystroke)
 
         # Image navigation
+        from pathlib import Path
+
         image_frame = tk.Frame(self.root)
         image_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+
+        # Label "1/20"
         self.image_label = tk.Label(
             image_frame, 
             text=f"Image: {self.image_idx + 1}/{len(self.image_dataset)}"
         )
-        self.image_label.pack(padx=5, pady=5)
+        self.image_label.pack(padx=5, pady=2)
+
+        # Label pour nom de fichier complet (tronqué si trop long)
+        self.filename_label = tk.Label(
+            image_frame,
+            text=self.get_current_filename(),
+            wraplength=500,   # largeur max avant retour à la ligne
+            fg="lightgray",
+            justify=tk.LEFT
+        )
+        self.filename_label.pack(padx=5, pady=2)
+
+        # Slider
         self.image_slider = ttk.Scale(
             image_frame, 
             from_=0, 
@@ -489,16 +516,6 @@ class BioticSegmentation:
         )
         self.image_slider.set(self.image_idx)
         self.image_slider.pack(padx=5, pady=5)
-
-        # Draw mode
-        draw_mode_frame = ttk.Frame(self.root)
-        draw_mode_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
-        self.draw_mode_label = tk.Label(
-            draw_mode_frame, 
-            text=f"Draw Mode:\n{self.draw_mode.capitalize()}", 
-            width=20
-        )
-        self.draw_mode_label.pack(padx=5, pady=5)
 
         # Status
         status_frame = ttk.Frame(self.root)
