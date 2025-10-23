@@ -32,12 +32,14 @@ The following table lists the two configurations that have been tested:
 | **Python** | ≥ 3.10 | ≥ 3.11 |
 | **PyTorch** | CPU version | CUDA 12.x version |
 
-***Note:** SAM 2.1 can run without a GPU, but inference will be significantly slower.  
-For batch or high-resolution image processing, an NVIDIA GPU (≥ 12 GB VRAM) is recommended.*
+> **Note :** SAM 2.1 can run without a GPU, but inference will be significantly slower.  
+For batch or high-resolution image processing, an NVIDIA GPU (≥ 12 GB VRAM) or Apple MPS is recommended.
 
 ---
 
-### Installation (Windows🪟/ Linux🐧)
+## 2.  Installation (Windows / Linux / macOS)
+
+### On Windows / Linux
 
 1. Install **Python 3.10 or 3.11** from [python.org/downloads](https://www.python.org/downloads/).  
    ➤ Check **“Add Python to PATH”** during installation.  
@@ -45,8 +47,28 @@ For batch or high-resolution image processing, an NVIDIA GPU (≥ 12 GB VRAM) is
    ➤ Check **“Git Bash Here”** to add a context menu option.
 
 ---
+### On macOS
 
-## 2. Create a working folder and clone SAMourAI
+1. With **Homebrew**:
+   
+```bash
+brew install python@3.11
+```
+
+   ➤ Verify installation:
+
+```bash
+python3 --version
+```
+2. To install Git, run
+
+```bash
+brew install git
+```
+
+---
+
+## 3. Create a working folder and clone SAMourAI
 
 Open **PowerShell** or **Command Prompt**, then run:
 
@@ -55,41 +77,73 @@ cd C:\Users\<user>\Documents
 git clone https://github.com/cgalinier/SAMourAI.git
 ```
 
-## 3. Clone the official SAM 2 repository
+## 4. Clone the official SAM 2 repository
 ```bash
 cd SAMourAI
 git clone https://github.com/facebookresearch/segment-anything-2.git
 ```
 
-## 4. Create & activate a virtual environment
+## 5. Create & activate a virtual environment
 
 **On Windows**
+
 ```bash
 python -m venv samourai_env
 samourai_env\Scripts\activate
 ```
-**On Linux**
+
+**On Linux / macOS**
+
 ```bash
 python -m venv samourai_env
 source samourai_env/bin/activate
 ```
----
-Once activated, the prompt will show the (samourai_env) prefix.
 
-## 5. Install dependencies
+>Once activated, the prompt will show the (samourai_env) prefix.
+
+---
+
+## 6. Install dependencies
 
 From the `SAMourAI/` folder:
+
 ```bash
 pip install --upgrade pip
+```
+
+### (Windows / Linux)
+#### For GPU NVIDIA (Windows / Linux)
+
+```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 ```
-If you do not have an NVIDIA GPU, run instead:
+#### For CPU only
+
 ```bash
 pip install torch torchvision torchaudio
+pip install -r requirements.txt
 ```
 
-## 6. Download SAM 2 models (checkpoints)
+### For macOS (CPU ou GPU Apple MPS)
+
+```bash
+pip install torch torchvision torchaudio
+pip install -r requirements.txt
+```
+
+Test MPS support in Python :
+
+```python
+import torch
+print(torch.backends.mps.is_available())
+```
+
+If `True` → GPU acceeération via Metal is active.
+
+---
+
+## 7. Download SAM 2 models (checkpoints)
 
 Open Git Bash and run:
 ```bash
@@ -105,7 +159,7 @@ This script downloads the following model files:
 - `sam2.1_hiera_base_plus.pt`
 - `sam2.1_hiera_large.pt`
 
-## 7. SAM 2  configurations
+## 8. SAM 2  configurations
 
 Verify that the following folder exists:
 `SAMourAI/segment-anything-2/sam2/configs/sam2.1/`
@@ -116,42 +170,71 @@ And that it contains:
 - `sam2.1_hiera_b+.yaml`
 - `sam2.1_hiera_l.yaml`
 
-## 8. Launching SAMourAI
-First run (from the virtual environment):
-**On Windows**
+---
+
+## 9. Launching SAMourAI
+Before first run (from the virtual environment), install requirements:
+
+### Windows
+
 ```bash
 cd C:\Users\<user>\Documents\SAMourAI
 samourai_env\Scripts\activate
 pip install -r requirements.txt
 ```
+* CPU version: run `SAMourAI_lite.bat`
+* GPU version: run `SAMourAI.bat`
 
-**Execution**
+### Linux
 
+```bash
+cd C:\Users\<user>\Documents\SAMourAI
+samourai_env\Scripts\activate
+pip install -r requirements.txt
+```
+* CPU version: run
 
-**On Windows🪟**
-- CPU version: run `SAMourAI_lite.bat`
-- GPU version: run `SAMourAI.bat`
-
-**On Linux🐧**
-- CPU version: run
 ```bash
 chmod +x Linux/SAMourAI_lite.sh
 ./Linux/SAMourAI_lite.sh
 ```
 ➜ `SAMourAI_lite.sh` is now an executable file (double-click)
 
-- GPU version: run
+* GPU version: run
 ```bash
 chmod +x Linux/SAMourAI.sh
 ./Linux/SAMourAI.sh
 ```
 ➜ `SAMourAI.sh` is now an executable file (double-click)
 
+### macOS
+
+* CPU :
+
+```bash
+source samourai_env/bin/activate
+chmod +x macOS/SAMourAI_lite.sh
+./macOS/SAMourAI_lite.sh
+```
+
+➜ `SAMourAI_lite.sh` is now an executable file (double-click)
+
+* GPU (Apple M1/M2/M3) :
+
+```bash
+source samourai_env/bin/activate
+chmod +x macOS/SAMourAI.sh
+./macOS/SAMourAI.sh
+```
+
+➜ `SAMourAI.sh` is now an executable file (double-click)
+
 ---
 
-➠ Segmentation masks are saved in the `masks/` folder.
+> Segmentation masks are saved in the `masks/` folder.
 
-### 9. Project structure
+### 10. Project structure
+
 ```bash
 SAMourAI/
 ├── assets/                   # Resources (application icon)
@@ -171,6 +254,9 @@ SAMourAI/
 ├── Linux/                    
 │   ├── SAMourAI.sh           # GPU interface launcher (Linux version)
 │   └── SAMourAI_lite.sh      # CPU interface launcher (Linux version)
+├── macOS/
+│   ├── SAMourAI.sh           # GPU interface launcher (macOS version)
+│   └── SAMourAI_lite.sh      # CPU interface launcher (macOS version)
 ├── masks/                    # Segmentation masks outputs
 ├── samourai_env/             # Virtual environment
 ├── segment-anything-2/       # Integrated SAM 2 repository
@@ -182,7 +268,9 @@ SAMourAI/
 
 ```
 
-## 10. Resources
+---
+
+## 11. Resources
 
 - **SAMBIOTIC**  
   [https://github.com/jeremyfix/sambiotic](https://github.com/jeremyfix/sambiotic)  
