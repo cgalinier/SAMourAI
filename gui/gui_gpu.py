@@ -535,6 +535,14 @@ class BioticSegmentation:
         )
         self.status_label.pack(side=tk.TOP, pady=2)
 
+        # ------------------------- Draw mode label -------------------------
+        self.draw_mode_label = tk.Label(
+            status_frame,
+            text=f"Draw Mode:\n{self.draw_mode}",
+            fg="yellow"
+        )
+        self.draw_mode_label.pack(side=tk.TOP, pady=2)
+
         # Model selector
         model_frame = ttk.Frame(self.root)
         model_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
