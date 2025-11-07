@@ -246,16 +246,20 @@ class BioticSegmentation:
             self.status_label.config(text="Error loading model!")
 
     # ------------------------- Image Loading -------------------------
+    
     def load_images(self, directory=None):
         if directory is None:
             directory = tkinter.filedialog.askdirectory(
-                initialdir=".", 
+                initialdir=self.last_dir if hasattr(self, 'last_dir') else ".", 
                 title="Select a directory of images"
             )
             if not directory:
                 return
+            
+        # Last open directory
+        self.last_dir = directory
 
-        self.image_dataset = FileBrowser(directory, self.device, max_size=MAX_IMAGE_SIZE)
+        self.image_dataset = FileBrowser(directory, self.device)
         
         if len(self.image_dataset) == 0:
             print("[INFO] Aucun fichier à traiter.")
@@ -264,14 +268,24 @@ class BioticSegmentation:
         self.out_mask = [None] * len(self.image_dataset)
         self.current_annotation_id = [1] * len(self.image_dataset)
         self.init_processing()
-        self.preload_adjacent_images()
+
+        # ------------------ MAJ slider ------------------
+        if hasattr(self, 'image_slider'):
+            self.image_slider.config(from_=0, to=len(self.image_dataset)-1)
+            self.image_slider.set(0)
+            self.image_idx = 0
+            self.image_label.config(text=f"Image: {self.image_idx + 1}/{len(self.image_dataset)}")
+            self.filename_label.config(text=self.get_current_filename())
+            self.update_display()  # affiche la première image du nouveau dossier
+
 
     def init_processing(self):
         self.current_image = self.image_dataset[self.image_idx]
         self.predictor.set_image(self.current_image)
         self.prompts = [{"positive": [], "negative": [], "box": None} 
-                       for _ in range(len(self.image_dataset))]
+                        for _ in range(len(self.image_dataset))]
         self.box1_x = self.box1_y = self.box2_x = self.box2_y = None
+
 
     # ------------------------- Prediction with Throttling -------------------------
     def compute_predictions(self):
@@ -428,6 +442,24 @@ class BioticSegmentation:
                     self.out_mask[self.image_idx] == self.current_annotation_id[self.image_idx]
                 ] = 0
             self.update_display()
+
+        elif event.char == "u":  # Undo last mask
+            self.undo_last_mask()
+
+    # ------------------------- Undo Last Mask -------------------------
+    def undo_last_mask(self):
+        if self.current_annotation_id[self.image_idx] > 1:
+            last_id = self.current_annotation_id[self.image_idx] - 1
+            mask = self.out_mask[self.image_idx]
+            if mask is not None:
+                mask[mask == last_id] = 0  # Supprime le dernier objet
+            self.current_annotation_id[self.image_idx] -= 1
+            self.prompts[self.image_idx] = {"positive": [], "negative": [], "box": None}
+            self.update_display()
+            print(f"[INFO] Last mask removed. Current annotation ID: {self.current_annotation_id[self.image_idx]}")
+        else:
+            print("[INFO] No mask to undo.")
+
 
     # ------------------------- Image Navigation -------------------------
     def change_image(self, value):
@@ -714,6 +746,7 @@ class BioticSegmentation:
         help_text.insert(tk.END, "r - Reset current image\n")
         help_text.insert(tk.END, "Enter - New object (increment ID)\n")
         help_text.insert(tk.END, "Backspace - Remove last annotation\n")
+        help_text.insert(tk.END, "u - Remove last mask object annotation\n")
         help_text.insert(tk.END, "q - Quit\n\n")
         help_text.insert(tk.END, "CPU Optimizations Active:\n\n")
         help_text.insert(tk.END, f"• Images resized to max {MAX_IMAGE_SIZE}px\n")
