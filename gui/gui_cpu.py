@@ -92,9 +92,13 @@ class FileBrowser:
             os.makedirs(self.directory)
             print(f"[INFO] Le dossier {self.directory} n'existait pas, il a été créé.")
 
+        self.files = []  
         exts = ["*.jpeg", "*.jpg", "*.png", "*.JPEG", "*.JPG", "*.PNG"]
         for ext in exts:
             self.files.extend(glob.glob(os.path.join(self.directory, ext)))
+        
+        self.files = list(set(self.files))
+        self.files.sort()
 
         if not self.files:
             print(f"[INFO] Aucune image trouvée. Sélection d'images...")
