@@ -117,12 +117,14 @@ pip install --upgrade pip
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
+pip install scipy
 ```
 #### For CPU only
 
 ```bash
 pip install torch torchvision torchaudio
 pip install -r requirements.txt
+pip install scipy
 ```
 
 ### For macOS (CPU ou GPU Apple MPS)
@@ -139,7 +141,7 @@ import torch
 print(torch.backends.mps.is_available())
 ```
 
-If `True` → GPU acceeération via Metal is active.
+If `True` → GPU acceleration via Metal is active.
 
 ---
 
@@ -181,6 +183,7 @@ Before first run (from the virtual environment), install requirements:
 cd C:\Users\<user>\Documents\SAMourAI
 samourai_env\Scripts\activate
 pip install -r requirements.txt
+pip install scipy
 ```
 * CPU version: run `SAMourAI_lite.bat`
 * GPU version: run `SAMourAI.bat`
@@ -191,6 +194,7 @@ pip install -r requirements.txt
 cd C:\Users\<user>\Documents\SAMourAI
 samourai_env\Scripts\activate
 pip install -r requirements.txt
+pip install scipy
 ```
 * CPU version: run
 

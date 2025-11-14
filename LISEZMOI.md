@@ -189,6 +189,7 @@ Avant la 1ère utilisation, lancer depuis l'environnement virtuel:
 cd C:\Users\<user>\Documents\SAMourAI
 samourai_env\Scripts\activate
 pip install -r requirements.txt
+pip install scipy
 ```
 
 * CPU version : lancer `SAMourAI_lite.bat`
@@ -200,6 +201,7 @@ pip install -r requirements.txt
 cd C:\Users\<user>\Documents\SAMourAI
 samourai_env\Scripts\activate
 pip install -r requirements.txt
+pip install scipy
 ```
 * CPU version:
 
