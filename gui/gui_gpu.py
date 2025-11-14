@@ -1,8 +1,9 @@
 # coding: utf-8
 """
-SAMourAI - GPU Version
+SAMourAI - GPU Version avec correction manuelle
 Optimized for workstations with CUDA GPU
 Default model: sam2.1-hiera-large (best quality)
++ Manual mask correction with brush tool
 """
 
 # ===============================================================
@@ -33,10 +34,20 @@ import glob
 import tkinter as tk
 import tkinter.filedialog
 from tkinter import ttk
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 import numpy as np
 import torch
 import sv_ttk
+from scipy import ndimage
+
+
+# Import scipy if available, otherwise use fallback
+try:
+    from scipy import ndimage
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+    print("[WARNING] scipy not available. Using fallback for hole filling.")
 
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
@@ -61,13 +72,12 @@ AVAILABLE_MODELS = {
         "checkpoint": "checkpoints/sam2.1_hiera_small.pt",
         "description": "Small (Fast)"
     },
-    "sam2.1-hiera-tiny": {  # <-- ajout du modèle tiny
+    "sam2.1-hiera-tiny": {
         "config": "configs/sam2.1/sam2.1_hiera_t.yaml",
         "checkpoint": "checkpoints/sam2.1_hiera_tiny.pt",
         "description": "Tiny (Very fast / Low VRAM)"
     },
 }
-
 
 
 # ----------------------------- Model -----------------------------
@@ -157,6 +167,7 @@ class BioticSegmentation:
         
         self.current_modelname = modelname
         self.point_size = 10
+        self.brush_size = 15  # Taille du pinceau pour correction manuelle
         self.last_mask_color = np.array([0, 0, 1])
         self.objects_colors = []
         self.positive_color = "red"
@@ -164,6 +175,8 @@ class BioticSegmentation:
         self.drawing_box = False
         self.draw_mode = "box"
         self.point_mode = "positive"
+        self.brush_mode = "add"  # "add" ou "erase"
+        self.is_brushing = False
         self.upper_left_xy = (0, 0)
         self.bottom_right_xy = (0, 0)
 
@@ -212,7 +225,6 @@ class BioticSegmentation:
             self.status_label.config(text="Error loading model!")
 
     # ------------------------- Image Loading -------------------------
-    
     def load_images(self, directory=None):
         if directory is None:
             directory = tkinter.filedialog.askdirectory(
@@ -222,9 +234,7 @@ class BioticSegmentation:
             if not directory:
                 return
             
-        # Last open directory
         self.last_dir = directory
-
         self.image_dataset = FileBrowser(directory, self.device)
         
         if len(self.image_dataset) == 0:
@@ -235,15 +245,13 @@ class BioticSegmentation:
         self.current_annotation_id = [1] * len(self.image_dataset)
         self.init_processing()
 
-        # ------------------ MAJ slider ------------------
         if hasattr(self, 'image_slider'):
             self.image_slider.config(from_=0, to=len(self.image_dataset)-1)
             self.image_slider.set(0)
             self.image_idx = 0
             self.image_label.config(text=f"Image: {self.image_idx + 1}/{len(self.image_dataset)}")
             self.filename_label.config(text=self.get_current_filename())
-            self.update_display()  # affiche la première image du nouveau dossier
-
+            self.update_display()
 
     def init_processing(self):
         self.current_image = self.image_dataset[self.image_idx]
@@ -251,7 +259,6 @@ class BioticSegmentation:
         self.prompts = [{"positive": [], "negative": [], "box": None} 
                         for _ in range(len(self.image_dataset))]
         self.box1_x = self.box1_y = self.box2_x = self.box2_y = None
-
 
     # ------------------------- Prediction -------------------------
     def compute_predictions(self):
@@ -291,6 +298,57 @@ class BioticSegmentation:
         bkgrd_mask = self.out_mask[self.image_idx] == 0
         self.out_mask[self.image_idx][np.logical_and(bkgrd_mask, masks==1)] = ann_obj_id
 
+    # ------------------------- Manual Correction -------------------------
+    def fill_holes(self):
+        """Remplit automatiquement les trous dans le masque actuel"""
+        if self.out_mask[self.image_idx] is None:
+            return
+        
+        ann_obj_id = self.current_annotation_id[self.image_idx]
+        mask = self.out_mask[self.image_idx] == ann_obj_id
+        
+        if not mask.any():
+            print("[INFO] No mask to fill holes")
+            return
+        
+        # Remplissage des trous avec scipy
+        filled_mask = ndimage.binary_fill_holes(mask)
+        self.out_mask[self.image_idx][filled_mask] = ann_obj_id
+        
+        self.update_display()
+        print("[INFO] Holes filled")
+
+    def apply_brush(self, x, y):
+        """Applique le pinceau à la position donnée"""
+        if self.out_mask[self.image_idx] is None:
+            self.out_mask[self.image_idx] = np.zeros(
+                self.current_image.shape[:2], dtype=np.int32
+            )
+        
+        x, y = self.image_coords_to_mask_coords(x, y)
+        x, y = int(x), int(y)
+        
+        if x < 0 or x >= self.current_image.shape[1] or y < 0 or y >= self.current_image.shape[0]:
+            return
+        
+        ann_obj_id = self.current_annotation_id[self.image_idx]
+        
+        # Créer un masque circulaire pour le pinceau
+        Y, X = np.ogrid[:self.current_image.shape[0], :self.current_image.shape[1]]
+        dist_from_center = np.sqrt((X - x)**2 + (Y - y)**2)
+        brush_mask = dist_from_center <= self.brush_size
+        
+        if self.brush_mode == "add":
+            # Ajouter au masque
+            self.out_mask[self.image_idx][brush_mask] = ann_obj_id
+        else:  # erase
+            # Effacer du masque
+            erase_mask = np.logical_and(
+                brush_mask, 
+                self.out_mask[self.image_idx] == ann_obj_id
+            )
+            self.out_mask[self.image_idx][erase_mask] = 0
+
     # ------------------------- Coordinate Conversion -------------------------
     def image_coords_to_mask_coords(self, x, y):
         x = ((x - self.upper_left_xy[0]) / (self.bottom_right_xy[0] - self.upper_left_xy[0]) 
@@ -320,16 +378,24 @@ class BioticSegmentation:
         if (b1_x < 0 or b1_x >= self.current_image.shape[1] or 
             b1_y < 0 or b1_y >= self.current_image.shape[0]):
             return
-        if self.draw_mode == "box":
+        
+        if self.draw_mode == "brush":
+            self.is_brushing = True
+            self.apply_brush(event.x, event.y)
+            self.update_display()
+        elif self.draw_mode == "box":
             self.box1_x, self.box1_y = b1_x, b1_y
             self.drawing_box = True
         else:
             self.add_point((event.x, event.y))
-        self.compute_predictions()
-        self.update_display()
+            self.compute_predictions()
+            self.update_display()
 
     def on_mouse_drag(self, event):
-        if self.draw_mode == "box" and self.drawing_box:
+        if self.draw_mode == "brush" and self.is_brushing:
+            self.apply_brush(event.x, event.y)
+            self.update_display()
+        elif self.draw_mode == "box" and self.drawing_box:
             self.box2_x, self.box2_y = self.image_coords_to_mask_coords(event.x, event.y)
             self.prompts[self.image_idx]["box"] = [
                 min(self.box1_x, self.box2_x),
@@ -341,6 +407,8 @@ class BioticSegmentation:
             self.update_display()
 
     def on_mouse_release(self, event):
+        if self.is_brushing:
+            self.is_brushing = False
         if self.drawing_box:
             self.drawing_box = False
             if self.draw_mode == "box":
@@ -360,6 +428,22 @@ class BioticSegmentation:
         elif event.char == "b":
             self.draw_mode = "box"
             self.draw_mode_label.config(text="Draw Mode:\nBox")
+        elif event.char == "m":  # Manual brush mode (add)
+            self.draw_mode = "brush"
+            self.brush_mode = "add"
+            self.draw_mode_label.config(text="Draw Mode:\nBrush (Add)")
+        elif event.char == "e":  # Erase mode
+            self.draw_mode = "brush"
+            self.brush_mode = "erase"
+            self.draw_mode_label.config(text="Draw Mode:\nBrush (Erase)")
+        elif event.char == "f":  # Fill holes
+            self.fill_holes()
+        elif event.char == "+":  # Increase brush size
+            self.brush_size = min(50, self.brush_size + 5)
+            print(f"[INFO] Brush size: {self.brush_size}")
+        elif event.char == "-":  # Decrease brush size
+            self.brush_size = max(5, self.brush_size - 5)
+            print(f"[INFO] Brush size: {self.brush_size}")
         elif event.keysym == "Left":
             self.change_image(max(0, self.image_idx - 1))
             self.image_slider.set(self.image_idx)
@@ -386,24 +470,25 @@ class BioticSegmentation:
                     self.out_mask[self.image_idx] == self.current_annotation_id[self.image_idx]
                 ] = 0
             self.update_display()
-
-        elif event.char == "u":  # Undo last mask
+        elif event.char == "u":
             self.undo_last_mask()
 
-    # ------------------------- Undo Last Mask -------------------------
+    def update_brush_size_label(self):
+        self.brush_size_label.config(text=f"Brush Size: {self.brush_size}")
+
+        # ------------------------- Undo Last Mask -------------------------
     def undo_last_mask(self):
         if self.current_annotation_id[self.image_idx] > 1:
             last_id = self.current_annotation_id[self.image_idx] - 1
             mask = self.out_mask[self.image_idx]
             if mask is not None:
-                mask[mask == last_id] = 0  # Supprime le dernier objet
+                mask[mask == last_id] = 0
             self.current_annotation_id[self.image_idx] -= 1
             self.prompts[self.image_idx] = {"positive": [], "negative": [], "box": None}
             self.update_display()
             print(f"[INFO] Last mask removed. Current annotation ID: {self.current_annotation_id[self.image_idx]}")
         else:
             print("[INFO] No mask to undo.")
-
 
     # ------------------------- Image Navigation -------------------------
     def change_image(self, value):
@@ -501,7 +586,7 @@ class BioticSegmentation:
     # ------------------------- UI -------------------------
     def init_ui(self):
         self.root = tk.Tk()
-        self.root.title("SAMourAI GPU - Image Segmentation Tool")
+        self.root.title("SAMourAI GPU - Image Segmentation Tool + Manual Correction")
 
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "icon.ico")
         if os.path.exists(icon_path):
@@ -522,29 +607,24 @@ class BioticSegmentation:
         self.root.bind("<Key>", self.on_keystroke)
 
         # Image navigation
-        from pathlib import Path
-
         image_frame = tk.Frame(self.root)
         image_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
 
-        # Label "1/20"
         self.image_label = tk.Label(
             image_frame, 
             text=f"Image: {self.image_idx + 1}/{len(self.image_dataset)}"
         )
         self.image_label.pack(padx=5, pady=2)
 
-        # Label pour nom de fichier complet (tronqué si trop long)
         self.filename_label = tk.Label(
             image_frame,
             text=self.get_current_filename(),
-            wraplength=500,   # largeur max avant retour à la ligne
+            wraplength=500,
             fg="lightgray",
             justify=tk.LEFT
         )
         self.filename_label.pack(padx=5, pady=2)
 
-        # Slider
         self.image_slider = ttk.Scale(
             image_frame, 
             from_=0, 
@@ -573,13 +653,21 @@ class BioticSegmentation:
         )
         self.status_label.pack(side=tk.TOP, pady=2)
 
-        # ------------------------- Draw mode label -------------------------
+        # Draw mode label
         self.draw_mode_label = tk.Label(
             status_frame,
             text=f"Draw Mode:\n{self.draw_mode}",
             fg="yellow"
         )
         self.draw_mode_label.pack(side=tk.TOP, pady=2)
+
+        # Brush size indicator
+        self.brush_size_label = tk.Label(
+            status_frame,
+            text=f"Brush Size: {self.brush_size}",
+            fg="cyan"
+        )
+        self.brush_size_label.pack(side=tk.TOP, pady=2)
 
         # Model selector
         model_frame = ttk.Frame(self.root)
@@ -615,6 +703,14 @@ class BioticSegmentation:
         )
         self.load_button.pack(side=tk.TOP, pady=5)
         
+        # Fill holes button
+        self.fill_holes_button = ttk.Button(
+            self.root, 
+            text="Fill Holes (F)", 
+            command=self.fill_holes
+        )
+        self.fill_holes_button.pack(side=tk.TOP, pady=5)
+        
         self.help_button = ttk.Button(self.root, text="Help", command=self.show_help)
         self.help_button.pack(side=tk.TOP, pady=5)
         
@@ -632,21 +728,45 @@ class BioticSegmentation:
 
     def show_help(self):
         help_window = tk.Toplevel(self.root)
-        help_window.title("Help - GPU Version")
-        help_text = tk.Text(help_window, wrap=tk.WORD, width=50, height=30)
-        help_text.insert(tk.END, "SAMourAI - GPU Version\n\n")
-        help_text.insert(tk.END, "Keyboard shortcuts:\n\n")
-        help_text.insert(tk.END, "p - Positive point mode\n")
-        help_text.insert(tk.END, "n - Negative point mode\n")
-        help_text.insert(tk.END, "b - Box mode\n")
+        help_window.title("Help - GPU Version with Manual Correction")
+        help_text = tk.Text(help_window, wrap=tk.WORD, width=60, height=35)
+        help_text.insert(tk.END, "SAMourAI - GPU Version + Manual Correction\n\n")
+        help_text.insert(tk.END, "═══════════════════════════════════════\n")
+        help_text.insert(tk.END, "SEGMENTATION MODES:\n")
+        help_text.insert(tk.END, "═══════════════════════════════════════\n\n")
+        help_text.insert(tk.END, "p - Positive point mode (add to mask)\n")
+        help_text.insert(tk.END, "n - Negative point mode (exclude from mask)\n")
+        help_text.insert(tk.END, "b - Box mode (draw rectangle)\n\n")
+        help_text.insert(tk.END, "═══════════════════════════════════════\n")
+        help_text.insert(tk.END, "MANUAL CORRECTION MODES:\n")
+        help_text.insert(tk.END, "═══════════════════════════════════════\n\n")
+        help_text.insert(tk.END, "m - Brush mode (add to mask manually)\n")
+        help_text.insert(tk.END, "e - Erase mode (remove from mask)\n")
+        help_text.insert(tk.END, "+ - Increase brush size\n")
+        help_text.insert(tk.END, "- - Decrease brush size\n")
+        help_text.insert(tk.END, "f - Fill holes in current mask\n\n")
+        help_text.insert(tk.END, "═══════════════════════════════════════\n")
+        help_text.insert(tk.END, "NAVIGATION & MANAGEMENT:\n")
+        help_text.insert(tk.END, "═══════════════════════════════════════\n\n")
         help_text.insert(tk.END, "←/→ - Previous/Next image\n")
-        help_text.insert(tk.END, "r - Reset current image\n")
         help_text.insert(tk.END, "Enter - New object (increment ID)\n")
-        help_text.insert(tk.END, "Backspace - Remove last annotation\n")
-        help_text.insert(tk.END, "u - Remove last mask object annotation\n")
-        help_text.insert(tk.END, "q - Quit\n\n")
+        help_text.insert(tk.END, "Backspace - Remove current annotation\n")
+        help_text.insert(tk.END, "u - Undo last mask object\n")
+        help_text.insert(tk.END, "r - Reset current image (clear all)\n")
+        help_text.insert(tk.END, "q - Quit application\n\n")
+        help_text.insert(tk.END, "═══════════════════════════════════════\n")
+        help_text.insert(tk.END, "WORKFLOW TIPS:\n")
+        help_text.insert(tk.END, "═══════════════════════════════════════\n\n")
+        help_text.insert(tk.END, "1. Use SAM2 (p/n/b) for initial segmentation\n")
+        help_text.insert(tk.END, "2. Press 'f' to fill any holes automatically\n")
+        help_text.insert(tk.END, "3. Switch to 'm' (brush) to add missing parts\n")
+        help_text.insert(tk.END, "4. Switch to 'e' (erase) to remove excess\n")
+        help_text.insert(tk.END, "5. Adjust brush size with +/- as needed\n")
+        help_text.insert(tk.END, "6. Press Enter to validate and start new object\n\n")
+        help_text.insert(tk.END, "═══════════════════════════════════════\n")
         help_text.insert(tk.END, f"GPU: {torch.cuda.get_device_name(0) if self.device == 'cuda' else 'N/A'}\n")
         help_text.insert(tk.END, f"Model: {self.current_modelname}\n")
+        help_text.config(state=tk.DISABLED)
         help_text.pack()
 
 
@@ -654,8 +774,8 @@ class BioticSegmentation:
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("╔════════════════════════════════════════╗")
-        print("║     SAMourAI - GPU Version             ║")
-        print("║     Optimized for CUDA workstations    ║")
+        print("║  SAMourAI - GPU + Manual Correction    ║")
+        print("║  Optimized for CUDA workstations       ║")
         print("╚════════════════════════════════════════╝")
         print(f"\nDefault model: {DEFAULT_MODEL}")
         print("\nUsage:")
@@ -666,6 +786,11 @@ if __name__ == "__main__":
         print("\nAvailable models:")
         for name, info in AVAILABLE_MODELS.items():
             print(f"  • {name}: {info['description']}")
+        print("\n✨ NEW: Manual mask correction with brush tool!")
+        print("   - Press 'm' for brush mode (add)")
+        print("   - Press 'e' for erase mode")
+        print("   - Press 'f' to fill holes")
+        print("   - Press +/- to adjust brush size")
         sys.exit(1)
     
     directory = sys.argv[1]
